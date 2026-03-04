@@ -5,8 +5,18 @@ from datetime import datetime
 from collections import deque
 import logging
 import os
+from typing import Any
+
+
+
+from errors import INVALID_INPUT, NOT_FOUND, DB_ERROR, UNEXPECTED_ERROR, ok, err
 
 logger = logging.getLogger(__name__)
+
+def dict_depth(d, depth=0):
+    if not isinstance(d, dict) or not d:
+        return depth
+    return max(dict_depth(v, depth+1) for k, v in d.items())
 
 # ---------------------------------------------- #
 # ------ PAGES QUERY REFACTOR FUNCTIONS -------- #
@@ -51,110 +61,138 @@ def _validate_against_schema(refactored_envelope: dict, schema_sot: dict):
     """
 
     if not isinstance(refactored_envelope, dict):
-        return False, {"ok": False, "error": "not_a_dict"}
+        return err(INVALID_INPUT, message="refactored_envelope must be a dict", value=str(refactored_envelope))
 
-    schema_rel = convert_schema_to_key_value_relation_list(schema_sot)
-    envelope_rel = convert_schema_to_key_value_relation_list(refactored_envelope)
+    schema_rel = recursive_relational_list_for_sot(schema_sot)
 
-    # Depth check
-    if len(schema_rel) != len(envelope_rel):
-        logger.critical(
-            f"Schema mismatch: len({schema_rel}) != len({envelope_rel})" + " ---- Took place during _validate_against_schema()"
+    if not isinstance(schema_rel, list):
+        return err(UNEXPECTED_ERROR, message="During runtime, schema_rel list was not a list. This is a logical error", value=str(schema_rel))
+
+
+is_levels_verified: list[bool] = []
+
+def recursive_compare_sot_relation_to_envelope(_envelope: dict, _sot_relational_list: list):
+    __depth_envelope = dict_depth(_envelope)
+    __depth_sot = len(_sot_relational_list)
+
+    if type(_envelope) != dict or type(_sot_relational_list) != list:
+        return err(
+            UNEXPECTED_ERROR,
+            message="During runtime, envelope dict or sot relational list was not the correct type",
+            value=f"Envelope: {_envelope}" + " " + f"Relational list: {_sot_relational_list}",
         )
-        return False, {
-            "ok": False,
-            "error": "depth_mismatch",
-            "expected_depth": len(schema_rel),
-            "got_depth": len(envelope_rel),
+
+
+    if __depth_envelope != __depth_sot:
+        return err(
+            UNEXPECTED_ERROR,
+            message="The depth of envelope and sot did not match, this suggest internal logical inconsistency.",
+            value=f"Envelope: {str(_envelope)}" + " " + f"Relational list: {str(_sot_relational_list)}",
+        )
+
+relational_list_envelope = []
+def recursive_relational_list_envelope(_envelope: dict):
+    """
+    First two functions are used in the recursive creation. Since we have to convert some stringified values and keys
+    in prod passed envelopes,
+
+    @def convert_key_to_real_type():
+        @__key, a key passed in its raw form
+
+    @def convert_value_to_real_type():
+        @__value, a value passed in its raw form
+    """
+    def convert_key_to_real_type(__key):
+        envelope_key_types = {
+            str: [uuid.UUID],
         }
 
-    # Per-depth type validation
-    for depth, (schema_level, data_level) in enumerate(zip(schema_rel, envelope_rel)):
+        if not __key:
+            return err(
+                UNEXPECTED_ERROR,
+                message="Key in dict cannot be None. During runtime when creating relation list for envelope, None key was found.",
+                value=str(_envelope)
+            )
+        if type(__key) == str:
+            for __type in envelope_key_types[str]:
+                try:
+                    __type(__key)
+                    return __type
+                except ValueError:
+                    continue
+            return str
+        else:
+            return type(__key)
 
-        schema_key_types = set(schema_level[0])
-        schema_value_types = set(schema_level[1])
-
-        data_key_types = set(data_level[0])
-        data_value_types = set(data_level[1])
-
-        if not data_key_types.issubset(schema_key_types):
-            return False, {
-                "ok": False,
-                "error": "key_type_mismatch",
-                "depth": depth,
-                "expected": list(schema_key_types),
-                "got": list(data_key_types),
-            }
-
-        if not data_value_types.issubset(schema_value_types):
-            return False, {
-                "ok": False,
-                "error": "value_type_mismatch",
-                "depth": depth,
-                "expected": list(schema_value_types),
-                "got": list(data_value_types),
-            }
-
-    return True, {"ok": True}
-
-
-def convert_schema_to_key_value_relation_list(root: dict):
-
-    def depth(d):
-        return max(depth(_v) if isinstance(_v, dict) else 0 for _v in d.values()) + 1
-
-    def check_if_uuid_type(_uuid: str):
-        try:
-            uuid.UUID(_uuid)
-            return True
-        except Exception:
-            return False
+    def convert_value_to_type(__value):
+        envelope_value_types = {
+            str: [uuid.UUID, datetime],
+        }
+        if not __value:
+            return None
+        if type(__value) == str:
+            for __type in envelope_value_types[str]:
+                try:
+                    __type(__value)
+                    return __type
+                except ValueError:
+                    continue
+            return str
+        else:
+            return type(__value)
 
     """
-    Returns a list where index d contains:
-      [[key types at depth d], [value types at depth d]]
-    Aggregates across all dictionaries that exist at that depth.
+    Normal recursive functionality begins here. The following contents aim to solve the building of the relational
+    envelope list. The returned list will be used to later be compared with the sot_relational_list.
+    
+    @_envelope - is a parameter passed which corresponds to a prod retrieval of docmost db data, converted into SOT dict
+    format. The format is defined in their corresponding schema files.
     """
 
-    if not isinstance(root, dict):
-        raise TypeError("root must be a dict")
-
-    relational_list = []
-    q = deque([(root, 0)])
-
-    while q:
-        dct, __depth = q.popleft()
-
-        # Ensure relational_list has an entry for this depth
-        while len(relational_list) <= __depth:
-            relational_list.append([[], []])  # [key_types, value_types]
-
-        key_types, value_types = relational_list[__depth]
-
-        for k, v in dct.items():
-            is_k_uuid = check_if_uuid_type(k)
-            is_v_uuid = check_if_uuid_type(v)
-            if is_k_uuid:
-                key_types.append(type(uuid.UUID(k)))
-            else:
-                key_types.append(type(k))
-
-            if is_v_uuid:
-                value_types.append(type(uuid.UUID(v)))
-            else:
-                value_types.append(type(v))
+    for k, v in _envelope.items():
 
 
-            # Optional: if you also want to traverse dicts inside lists/tuples/sets
-            if isinstance(v, (list, tuple, set)):
-                for item in v:
-                    if isinstance(item, dict):
-                        q.append((item, __depth + 1))
 
-            elif isinstance(v, dict):
-                q.append((v, __depth + 1))
 
-    return relational_list
+relational_list_sot = []
+def recursive_relational_list_sot(_sot: dict):
+    def check_type(string_literal: str):
+        dict_value_types = {
+            uuid.UUID: "uuid",
+            str: "string",
+            datetime: "datetime",
+            dict: "dict",
+        }
+        type_returned = None
+        if not string_literal:
+            return type_returned
+        elif dict_value_types[uuid.UUID] in string_literal:
+            type_returned = uuid.UUID
+        elif dict_value_types[str] in string_literal:
+            type_returned = str
+        elif dict_value_types[datetime] in string_literal:
+            type_returned = datetime
+        else:
+            pass
+        return type_returned
+
+    global relational_list_sot
+    level_list = [[], []]
+    for k, v in _sot.items():
+        level_list[0].append(check_type(k))
+        if isinstance(v, dict):
+            level_list[1].append(dict)
+        else:
+            level_list[1].append(check_type(v))
+
+    relational_list_sot.append(level_list)
+
+    for v in _sot.values():
+        if isinstance(v, dict):
+            recursive_relational_list_for_sot(v)
+
+    return relational_list_sot
+
 
 # MODE
 MODE = os.getenv("MODE", "dev")
