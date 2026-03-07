@@ -9,10 +9,22 @@ from archon.archon import archon_search, archon_rag_query
 from web_search.web_search import web_search
 from ollama.ollama_client import call_ollama, parse_model_output
 
+from fastapi.middleware.cors import CORSMiddleware
+
 
 MAX_TOOL_LOOPS = int(os.getenv("MAX_TOOL_LOOPS", "5"))
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://141.0.85.201:41988",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ChatRequest(BaseModel):
@@ -147,3 +159,4 @@ from fastapi.responses import FileResponse
 @app.get("/debug")
 def debug():
     return FileResponse("index.html")
+
