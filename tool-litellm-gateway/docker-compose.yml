@@ -1,6 +1,6 @@
 services:
   litellm:
-    image: ghcr.io/berriai/litellm:main
+    image: ghcr.io/berriai/litellm:main-stable
     container_name: litellm-gateway
     command: ["--config", "/app/litellm_config.yaml", "--port", "4000", "--host", "0.0.0.0"]
     volumes:
