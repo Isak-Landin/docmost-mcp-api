@@ -1,7 +1,4 @@
-version: "3.8"
-
 services:
-
   litellm:
     image: ghcr.io/berriai/litellm:main
     container_name: litellm-gateway
@@ -11,6 +8,8 @@ services:
     ports:
       - "4000:4000"
     restart: unless-stopped
+    networks:
+      - web_network
 
   tool-gateway:
     image: python:3.12-slim
@@ -26,3 +25,9 @@ services:
     ports:
       - "4100:4100"
     restart: unless-stopped
+    networks:
+      - web_network
+
+networks:
+  web_network:
+    external:true
