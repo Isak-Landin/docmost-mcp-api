@@ -122,7 +122,11 @@ def call_ollama(messages: list[dict]):
         json=payload,
         timeout=120,
     )
-    r.raise_for_status()
+
+    if not r.ok:
+        print("OLLAMA STATUS:", r.status_code, flush=True)
+        print("OLLAMA BODY:", r.text, flush=True)
+        r.raise_for_status()
 
     data = r.json()
     return data["message"]["content"]
@@ -189,11 +193,8 @@ def chat(req: ChatRequest):
         try:
             tool_result = run_tool(tool_name, arguments)
         except requests.RequestException as e:
-            tool_result = {
-                "error": "tool_request_failed",
-                "tool_name": tool_name,
-                "message": str(e),
-            }
+            print(f"OLLAMA REQUEST FAILED: {e}", flush=True)
+            raise HTTPException(status_code=500, detail=f"ollama_request_failed: {str(e)}")
         except Exception as e:
             tool_result = {
                 "error": "tool_runtime_failed",
