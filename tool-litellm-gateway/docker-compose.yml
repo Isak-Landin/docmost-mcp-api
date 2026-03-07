@@ -30,4 +30,5 @@ services:
 
 networks:
   web_network:
-    external:true
+    external: true
+    name: web_network
