@@ -20,8 +20,10 @@ def call_ollama(user_message: str, history: list[dict] | None = None) -> dict:
     r = requests.post(
         f"{OLLAMA_BASE_URL}/api/chat",
         json=payload,
-        timeout=120,
+        timeout=300,
     )
+
+    print(r.json())
 
     if not r.ok:
         print("OLLAMA STATUS:", r.status_code, flush=True)
