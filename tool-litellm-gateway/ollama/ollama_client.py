@@ -16,6 +16,7 @@ def call_ollama(user_message: str, history: list[dict] | None = None) -> dict:
         user_message=user_message,
         history=history,
     )
+    print("OLLAMA PAYLOAD:", json.dumps(payload, indent=2), flush=True)
 
     r = requests.post(
         f"{OLLAMA_BASE_URL}/api/chat",
