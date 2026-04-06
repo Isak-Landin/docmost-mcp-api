@@ -11,10 +11,11 @@ from app.docmost import (
     SpaceNotFoundError,
     get_page as fetch_page,
     get_space as fetch_space,
+    get_space_tree as fetch_space_tree,
     list_pages as fetch_pages,
     list_spaces as fetch_spaces,
 )
-from app.models import PageOut, SpaceOut
+from app.models import PageOut, SpaceOut, SpaceTreeOut
 
 SERVER_INSTRUCTIONS = """
 This server is strictly read-only.
@@ -22,6 +23,7 @@ Never create, update, move, or delete spaces or pages.
 Only use the provided Docmost tools to inspect spaces and pages.
 Start with list_spaces when you need to identify the correct space.
 If the user gives a space name rather than a UUID, find the matching space via list_spaces first.
+When you need the page hierarchy of a space, prefer get_space_tree instead of reconstructing it yourself.
 Use the returned space_id for list_pages and get_page.
 Pages are always space-scoped: use space_id together with page_id, and use space_id for page listing.
 Treat text_content as normalized plain text, not authoritative rich formatting.
@@ -50,6 +52,17 @@ def get_space(space_id: UUID) -> SpaceOut:
     """Get one Docmost space by UUID."""
     try:
         return fetch_space(space_id)
+    except DocmostConnectionError as exc:
+        raise ToolError(str(exc)) from exc
+    except SpaceNotFoundError as exc:
+        raise ToolError(str(exc)) from exc
+
+
+@mcp.tool()
+def get_space_tree(space_id: UUID) -> SpaceTreeOut:
+    """Get the fully nested page tree for one space identified by space_id."""
+    try:
+        return fetch_space_tree(space_id)
     except DocmostConnectionError as exc:
         raise ToolError(str(exc)) from exc
     except SpaceNotFoundError as exc:

@@ -15,7 +15,7 @@ This service exposes:
 
 | Surface | Path | Purpose |
 |---|---|---|
-| REST API | `/health`, `/spaces`, `/spaces/{space_id}`, `/spaces/{space_id}/pages`, `/spaces/{space_id}/pages/{page_id}` | Read-only HTTP access to spaces and pages |
+| REST API | `/health`, `/spaces`, `/spaces/{space_id}`, `/spaces/{space_id}/tree`, `/spaces/{space_id}/pages`, `/spaces/{space_id}/pages/{page_id}` | Read-only HTTP access to spaces, trees, and pages |
 | MCP | `/mcp` | Remote streamable HTTP MCP endpoint |
 
 This service does **not** expose write operations.
@@ -35,6 +35,7 @@ This service does **not** expose write operations.
 | `GET` | `/health` | process health check only; does not verify database connectivity |
 | `GET` | `/spaces` | list all non-deleted spaces |
 | `GET` | `/spaces/{space_id}` | get one non-deleted space |
+| `GET` | `/spaces/{space_id}/tree` | get the nested page tree for one space |
 | `GET` | `/spaces/{space_id}/pages` | list all non-deleted pages in a space |
 | `GET` | `/spaces/{space_id}/pages/{page_id}` | get one non-deleted page in its space |
 
@@ -46,6 +47,7 @@ The MCP endpoint exposes these read-only tools:
 |---|---|
 | `list_spaces` | list all non-deleted spaces |
 | `get_space` | get one space by UUID |
+| `get_space_tree` | get the nested page tree for one space |
 | `list_pages` | list all pages in a space |
 | `get_page` | get one page by UUID inside a space |
 
@@ -55,8 +57,9 @@ This service is intentionally **space-first**.
 
 1. use `list_spaces` or `GET /spaces` to identify the correct Docmost space
 2. select the matching space by name, then use its `id` as `space_id`
-3. use `list_pages(space_id)` or `GET /spaces/{space_id}/pages` to inspect pages in that space
-4. use `get_page(space_id, page_id)` or `GET /spaces/{space_id}/pages/{page_id}` only after you know the correct IDs
+3. use `get_space_tree(space_id)` or `GET /spaces/{space_id}/tree` when you need the full nested structure quickly
+4. use `list_pages(space_id)` or `GET /spaces/{space_id}/pages` when you need the flat list for inspection or follow-up lookups
+5. use `get_page(space_id, page_id)` or `GET /spaces/{space_id}/pages/{page_id}` only after you know the correct IDs
 
 Important clarifications:
 
@@ -64,18 +67,50 @@ Important clarifications:
 - the tools and routes accept `space_id`, not a space name string
 - if you only know a space name, resolve it through `list_spaces` first
 - if content looks stale or deprecated, treat that as an explicit finding instead of silently assuming it is current
+- the tree is built dynamically from `pages.parent_page_id`
+- `parent_page_id = null` means the page is a top-level page in the space
+- each tree node can contain arbitrarily deep nested `children`
+- `orphan_pages` contains pages that could not be attached to a normal root because their parent is missing or otherwise unreachable
+
+## Recommended documentation-source workflow
+
+The intended usage is **not** merely "Docmost-related tasks."
+
+The intended usage is:
+
+- Docmost MCP is the main documentation source for the active project
+- established project direction, user decisions, and documented behavior should be read from Docmost when they are not fully present in the prompt
+- if the user refers to docs, documentation, a documented page, or a file/path that may be documented externally, check Docmost before guessing
+- because the remote Docmost surface is currently read-only, Copilot should maintain a **local replica** of the retrieved documentation for copy-pasteable project truth and manual later sync
+
+Recommended local-replica behavior:
+
+1. create a local replica location if it does not already exist
+2. mirror the remote space/page structure there as clearly as possible
+3. prefer the space tree output as the structure source when creating or refreshing that local replica
+4. update the local replica whenever newer remote Docmost content is established
+5. treat the local replica as the working copy-pasteable documentation source until remote write support exists
+
+Current limitation:
+
+- the server is read-only, so this workflow depends on local-file maintenance by the client
+- remote Docmost remains the source to read from, but the local replica is the place to keep immediately usable synced documentation text
 
 The MCP server also publishes built-in instructions:
 
 ```text
 This server is strictly read-only.
 Never create, update, move, or delete spaces or pages.
+Use this server as the main documentation source for the active project when documentation is relevant.
 Only use the provided Docmost tools to inspect spaces and pages.
 Start with list_spaces when you need to identify the correct space.
 If the user gives a space name rather than a UUID, find the matching space via list_spaces first.
+When you need the page hierarchy of a space, use get_space_tree instead of reconstructing it manually.
 Use the returned space_id for list_pages and get_page.
 Pages are always space-scoped: use space_id together with page_id, and use space_id for page listing.
 Treat text_content as normalized plain text, not authoritative rich formatting.
+If the user refers to docs, documented behavior, page names, or project guidance not fully present in the prompt, consult this server before guessing.
+Maintain or create a local replica of retrieved documentation when the client workflow allows it, because the remote surface is read-only.
 If content looks stale, deprecated, or inconsistent with newer verified behavior, say so explicitly.
 If requested data is missing, report that explicitly instead of inferring it.
 ```
@@ -397,6 +432,7 @@ Allow only these tools:
 ```text
 list_spaces
 get_space
+get_space_tree
 list_pages
 get_page
 ```
@@ -405,7 +441,8 @@ Recommended meaning of those tools in Copilot CLI:
 
 - `list_spaces`: first discovery step when you only know a human-readable space name
 - `get_space`: inspect one specific space once you already have its UUID
-- `list_pages`: second discovery step inside a chosen space
+- `get_space_tree`: preferred structure-discovery step for nested page relationships in a space
+- `list_pages`: flat page listing for follow-up inspection or lookup
 - `get_page`: final page fetch once both `space_id` and `page_id` are known
 
 ### 3. Use that isolated Copilot environment only for Docmost-related sessions
@@ -450,7 +487,7 @@ Minimal file structure:
     "docmost-mcp": {
       "type": "http",
       "url": "https://<YOUR_DOCMOST_MCP_HOST>/mcp",
-      "tools": ["list_spaces", "get_space", "list_pages", "get_page"]
+      "tools": ["list_spaces", "get_space", "get_space_tree", "list_pages", "get_page"]
     }
   }
 }
@@ -469,7 +506,7 @@ Example merged file when you want to keep other custom MCP servers too:
     "docmost-mcp": {
       "type": "http",
       "url": "https://<YOUR_DOCMOST_MCP_HOST>/mcp",
-      "tools": ["list_spaces", "get_space", "list_pages", "get_page"]
+      "tools": ["list_spaces", "get_space", "get_space_tree", "list_pages", "get_page"]
     }
   }
 }
@@ -495,9 +532,12 @@ inside a given session.
 At the beginning of a Docmost-related Copilot session, tell Copilot something like:
 
 ```text
-Use the docmost-mcp server for Docmost content lookup in this session.
+Use the docmost-mcp server as the main documentation source for this project in this session.
 Treat it as read-only.
+If docs, documented behavior, page names, or relevant paths are mentioned without full context in the prompt, consult docmost-mcp before guessing.
 Always start by identifying the correct Docmost space before looking up pages.
+Use get_space_tree when you need to understand nested documentation structure quickly.
+Create and maintain a local replica of retrieved documentation when needed, because the remote Docmost surface is read-only.
 Treat page content as possibly stale and call out deprecated or old material explicitly when you see it.
 Do not use it for unrelated repositories or unrelated tasks.
 ```
@@ -510,9 +550,12 @@ If you work in one or more repositories that are specifically tied to Docmost co
 you can also add Copilot instructions such as:
 
 ```md
-Use the docmost-mcp MCP server only for Docmost-related tasks in this repository.
+Use the docmost-mcp MCP server as the main documentation source for this repository and project direction.
 Treat the server as read-only.
+If documentation, documented behavior, page names, or relevant file/path references are mentioned without full context in the prompt, consult docmost-mcp before guessing.
 Resolve the correct space first, then inspect pages within that space.
+Use get_space_tree for nested documentation structure before falling back to manual page-by-page reconstruction.
+Create and maintain a local replica of retrieved documentation when needed, since the remote Docmost surface is read-only.
 If a page appears deprecated or stale relative to verified current behavior, say that explicitly.
 Do not use the Docmost MCP server in unrelated repositories.
 ```
@@ -549,10 +592,13 @@ That distinction matters here:
 Recommended local instruction content:
 
 ```md
-Use the docmost-mcp MCP server only for Docmost-related tasks.
+Use the docmost-mcp MCP server as the main documentation source for the active project.
 Treat it as read-only.
+If documentation, documented behavior, page names, or relevant file/path references are mentioned without full context in the prompt, consult docmost-mcp before guessing.
 Always resolve the correct space first, then inspect pages within that space.
 Pages are space-scoped and are not global lookups.
+Use get_space_tree when you need the nested structure of a space.
+Create and maintain a local replica of retrieved documentation when needed, because the remote Docmost surface is read-only.
 If a page appears stale, deprecated, or older than verified current behavior, say that explicitly.
 Prefer newer verified repo/runtime behavior over stale Docmost content when they conflict.
 ```
@@ -601,7 +647,7 @@ Check:
 Check:
 
 1. you identified the correct `space_id` via `/spaces` or `list_spaces` first
-2. you are using that same `space_id` for `/spaces/{space_id}/pages` or `list_pages`
+2. you are using that same `space_id` for `/spaces/{space_id}/tree`, `/spaces/{space_id}/pages`, `get_space_tree`, or `list_pages`
 3. you are not treating page lookup as global across all spaces
 4. the page may genuinely be stale, deleted, or in a different space
 
