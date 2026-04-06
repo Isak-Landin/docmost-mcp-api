@@ -1,0 +1,11 @@
+{
+  "id": null,
+  "title": "Configuration",
+  "slug_id": null,
+  "parent_page_id": null,
+  "local_dir_name": "Configuration",
+  "local_dir_path": "./Local-LLM-Helper-replica/Configuration",
+  "content_file_path": "./Local-LLM-Helper-replica/Configuration/page.md",
+  "meta_file_path": "./Local-LLM-Helper-replica/Configuration/_meta.json",
+  "source": "local-only"
+}

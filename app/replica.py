@@ -54,9 +54,9 @@ def _sanitize_path_component(value: Optional[str]) -> str:
     if not text:
         text = "Untitled"
     text = _INVALID_PATH_CHARS_RE.sub("-", text)
-    text = _WHITESPACE_RE.sub(" ", text)
+    text = _WHITESPACE_RE.sub("-", text)
     text = _MULTI_DASH_RE.sub("-", text)
-    text = text.strip().rstrip(". ")
+    text = text.strip().rstrip("-.")
     if not text or text in {".", ".."}:
         text = "Untitled"
     if text.upper() in _WINDOWS_RESERVED_NAMES:
@@ -72,7 +72,7 @@ def get_replica_standards() -> ReplicaStandardsOut:
     return ReplicaStandardsOut(
         replica_root_suffix=REPLICA_ROOT_SUFFIX,
         replica_root_example=f"./tool-ai-gateway{REPLICA_ROOT_SUFFIX}",
-        page_directory_base_rule="Use the filesystem-safe page title as the base directory name.",
+        page_directory_base_rule="Use the filesystem-safe page title as the base directory name. Spaces are replaced with hyphens; no spaces are allowed in any local directory or file name.",
         sibling_collision_rule="If sibling pages resolve to the same base directory name, append `__{slug_id}` to every page in that collision set.",
         final_collision_fallback_rule="If `slug_id` is missing or still collides, append `__{short_page_id}`.",
         page_content_file_name=PAGE_CONTENT_FILE_NAME,

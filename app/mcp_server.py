@@ -43,6 +43,7 @@ When you need the deterministic local replica layout for a space, use get_replic
 When you need naming or sync rules for local replica work, use get_replica_standards.
 When you need the correct local directory name for a planned page, use resolve_replica_directory_name.
 Maintain or create a local replica at `./{space_name}-replica/` when the client workflow allows it, because the remote surface is read-only.
+All local replica directory and file names must not contain spaces. Spaces in page titles or space names are replaced with hyphens when building local paths.
 Use get_replica_structure as the source for the initial local replica layout and for refreshing existing remote-backed replica content.
 Use get_replica_standards together with resolve_replica_directory_name for local-only documentation additions that do not yet exist on remote.
 Use the returned space_id for list_pages and get_page.

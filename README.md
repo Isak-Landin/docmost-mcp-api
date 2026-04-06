@@ -115,6 +115,8 @@ Use the replica surfaces when you want the client to stop guessing local layout.
 Replica root:
 
 - root path: `./{space_name}-replica/`
+- spaces in the space name are replaced with hyphens (e.g. "Local LLM Helper" → `./Local-LLM-Helper-replica/`)
+- no spaces are allowed in any local directory or file name
 
 Per-page replica mapping:
 
@@ -136,9 +138,10 @@ Replica root support files:
 
 Directory naming rule:
 
-1. use the filesystem-safe page title as the base directory name
+1. use the filesystem-safe page title as the base directory name — spaces are replaced with hyphens
 2. if sibling pages collide at the same level, use `{title}__{slug_id}`
 3. if `slug_id` is missing or still collides, use `{title}__{short_page_id}`
+4. no spaces are allowed in any local directory or file name at any level
 
 Sync and truth rule:
 
@@ -164,6 +167,7 @@ When you need the deterministic local replica layout for a space, use get_replic
 When you need naming or sync rules for local replica work, use get_replica_standards.
 When you need the correct local directory name for a planned page, use resolve_replica_directory_name.
 Maintain or create a local replica at `./{space_name}-replica/` when the client workflow allows it, because the remote surface is read-only.
+All local replica directory and file names must not contain spaces. Spaces in page titles or space names are replaced with hyphens when building local paths.
 Use get_replica_structure as the source for the initial local replica layout and for refreshing existing remote-backed replica content.
 Use get_replica_standards together with resolve_replica_directory_name for local-only documentation additions that do not yet exist on remote.
 Use the returned space_id for list_pages and get_page.

@@ -1,0 +1,11 @@
+{
+  "id": null,
+  "title": "Pages",
+  "slug_id": null,
+  "parent_page_id": "REST-API",
+  "local_dir_name": "Pages",
+  "local_dir_path": "./Local-LLM-Helper-replica/REST-API/Pages",
+  "content_file_path": "./Local-LLM-Helper-replica/REST-API/Pages/page.md",
+  "meta_file_path": "./Local-LLM-Helper-replica/REST-API/Pages/_meta.json",
+  "source": "local-only"
+}
