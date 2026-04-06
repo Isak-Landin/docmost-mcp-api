@@ -337,6 +337,11 @@ That means:
 - MCP server configuration persists across sessions for that Copilot config home
 - if you use your normal default Copilot config, the MCP server may be available in unrelated projects too
 
+Copilot CLI also ships with the GitHub MCP server by default. The isolated
+`COPILOT_HOME` approach is mainly about separating your **saved custom MCP config**
+from your usual config home. It does not mean "remove all built-in Copilot
+capabilities."
+
 ## Recommended safe setup for Docmost-only use
 
 Use a separate Copilot config home for Docmost work.
@@ -351,6 +356,21 @@ copilot
 ```
 
 That creates an isolated Copilot configuration set for Docmost work.
+
+If you already have other custom MCP servers configured in your normal Copilot setup
+and you want to keep using them in this isolated Docmost-focused setup, copy your
+existing MCP config into the new config home before adding Docmost MCP:
+
+```bash
+mkdir -p "$COPILOT_HOME"
+cp "$HOME/.copilot/mcp-config.json" "$COPILOT_HOME/mcp-config.json"
+```
+
+Then add or merge the `docmost-mcp` entry into that copied file.
+
+If you do **not** want any of your existing custom MCP servers in the isolated
+Docmost-focused setup, do not copy that file. In that case, start with the isolated
+config home and add only the Docmost MCP server you want.
 
 ### 2. Add the remote MCP server inside that Docmost-only Copilot environment
 
@@ -416,7 +436,13 @@ If you prefer to edit the config manually, create or update:
 ~/.copilot/mcp-config.json
 ```
 
-Example:
+If you are using a dedicated Docmost config home, the equivalent path is:
+
+```text
+$COPILOT_HOME/mcp-config.json
+```
+
+Minimal file structure:
 
 ```json
 {
@@ -430,16 +456,36 @@ Example:
 }
 ```
 
+Example merged file when you want to keep other custom MCP servers too:
+
+```json
+{
+  "mcpServers": {
+    "my-other-mcp": {
+      "type": "http",
+      "url": "https://<YOUR_OTHER_MCP_HOST>/mcp",
+      "tools": ["tool_a", "tool_b"]
+    },
+    "docmost-mcp": {
+      "type": "http",
+      "url": "https://<YOUR_DOCMOST_MCP_HOST>/mcp",
+      "tools": ["list_spaces", "get_space", "list_pages", "get_page"]
+    }
+  }
+}
+```
+
 This JSON structure matches the documented `mcpServers` format for Copilot MCP
 configuration: the server name maps to an object with `type`, `url`, and an explicit
 `tools` allowlist.
 
-If you are using the isolated configuration approach, this file lives under that
-Copilot home instead, for example:
+For this remote Docmost MCP server, the important fields are:
 
-```text
-$COPILOT_HOME/mcp-config.json
-```
+- `mcpServers`: top-level object containing named MCP server entries
+- `docmost-mcp`: the server name shown to Copilot
+- `type: "http"`: required for this remote HTTP MCP endpoint
+- `url`: the full remote MCP URL ending in `/mcp`
+- `tools`: explicit read-only allowlist for this server
 
 ## Per-session guidance for Copilot CLI
 
@@ -487,6 +533,28 @@ and user-level instructions in:
 
 ```text
 $HOME/.copilot/copilot-instructions.md
+```
+
+These instruction files are separate from `mcp-config.json`.
+
+- `mcp-config.json` tells Copilot **which MCP servers exist**
+- instruction files tell Copilot **how it should use them**
+
+That distinction matters here:
+
+- the Docmost MCP server already publishes server-side read-only instructions
+- but local Copilot instructions are still useful so Copilot understands the intended
+  usage pattern before it decides how to work in your session
+
+Recommended local instruction content:
+
+```md
+Use the docmost-mcp MCP server only for Docmost-related tasks.
+Treat it as read-only.
+Always resolve the correct space first, then inspect pages within that space.
+Pages are space-scoped and are not global lookups.
+If a page appears stale, deprecated, or older than verified current behavior, say that explicitly.
+Prefer newer verified repo/runtime behavior over stale Docmost content when they conflict.
 ```
 
 ## Updating the running service
