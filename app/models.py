@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -46,14 +46,3 @@ class PageOut(BaseModel):
 
     model_config = {"from_attributes": True}
 
-
-class PageCreate(BaseModel):
-    title: str = Field(description="Page title (required)")
-    parent_page_id: Optional[UUID] = Field(None, description="UUID of the parent page. Must belong to the same space.")
-    text_content: Optional[str] = Field(None, description="Plain-text page content")
-
-
-class PageUpdate(BaseModel):
-    title: Optional[str] = Field(None, description="New page title")
-    parent_page_id: Optional[UUID] = Field(None, description="New parent page UUID. Must belong to the same space.")
-    text_content: Optional[str] = Field(None, description="New plain-text page content")
