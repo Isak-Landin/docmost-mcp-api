@@ -1,3 +1,4 @@
+import json
 import random
 import string
 from typing import List
@@ -15,6 +16,14 @@ router = APIRouter(prefix="/spaces/{space_id}/pages", tags=["pages"])
 def _gen_slug(length: int = 10) -> str:
     chars = string.ascii_lowercase + string.digits
     return "".join(random.choices(chars, k=length))
+
+
+def _empty_tiptap_doc() -> str:
+    """Minimal valid Tiptap document required by Docmost to render a page."""
+    return json.dumps({
+        "type": "doc",
+        "content": [{"type": "paragraph", "attrs": {"id": _gen_slug(12)}}],
+    })
 
 
 def _assert_space_exists(cur, space_id: UUID) -> dict:
@@ -104,9 +113,9 @@ def create_page(space_id: UUID, body: PageCreate):
             sql = """
                 INSERT INTO public.pages
                     (slug_id, title, parent_page_id, space_id, workspace_id,
-                     is_locked, text_content, created_at, updated_at)
+                     is_locked, content, text_content, created_at, updated_at)
                 VALUES
-                    (%s, %s, %s, %s, %s, false, %s, now(), now())
+                    (%s, %s, %s, %s, %s, false, %s::jsonb, %s, now(), now())
                 RETURNING id, slug_id, title, icon, position, parent_page_id,
                           creator_id, last_updated_by_id, space_id, workspace_id,
                           is_locked, text_content, created_at, updated_at
@@ -119,6 +128,7 @@ def create_page(space_id: UUID, body: PageCreate):
                     str(body.parent_page_id) if body.parent_page_id else None,
                     str(space_id),
                     str(workspace_id),
+                    _empty_tiptap_doc(),
                     body.text_content,
                 ),
             )
