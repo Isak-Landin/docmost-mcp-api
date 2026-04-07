@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c83b-7ab4-9749-3320b717ce78",
+  "id": "019d682e-2fca-7446-a16f-aee2c1681d4c",
   "title": "Pages",
-  "slug_id": null,
-  "parent_page_id": "019d636e-c4f3-7e8b-9913-1cdf1f94f29c",
+  "slug_id": "ptzFaAo52q",
+  "parent_page_id": "019d682d-2ca8-7933-9210-92535dc1c1be",
   "local_dir_name": "Pages",
-  "local_dir_path": "./Local-LLM-Helper-replica/REST-API/Pages",
-  "content_file_path": "./Local-LLM-Helper-replica/REST-API/Pages/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/REST-API/Pages/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/REST-API/Pages",
+  "content_file_path": "./Docmost-mcp-crud/REST-API/Pages/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/REST-API/Pages/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }

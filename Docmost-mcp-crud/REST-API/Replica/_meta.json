@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c8a9-7893-a1ed-4b4668aabd7c",
+  "id": "019d682e-321a-785a-aa87-7222452f19e3",
   "title": "Replica",
-  "slug_id": null,
-  "parent_page_id": "019d636e-c4f3-7e8b-9913-1cdf1f94f29c",
+  "slug_id": "HShMmoyHWk",
+  "parent_page_id": "019d682d-2ca8-7933-9210-92535dc1c1be",
   "local_dir_name": "Replica",
-  "local_dir_path": "./Local-LLM-Helper-replica/REST-API/Replica",
-  "content_file_path": "./Local-LLM-Helper-replica/REST-API/Replica/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/REST-API/Replica/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/REST-API/Replica",
+  "content_file_path": "./Docmost-mcp-crud/REST-API/Replica/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/REST-API/Replica/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }

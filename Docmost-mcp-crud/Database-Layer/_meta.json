@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c6ed-7b5c-9c63-5cf974214973",
+  "id": "019d682d-2a69-76e1-a3ee-1730bca7c387",
   "title": "Database-Layer",
-  "slug_id": null,
+  "slug_id": "rm9h8hpLU5",
   "parent_page_id": null,
   "local_dir_name": "Database-Layer",
-  "local_dir_path": "./Local-LLM-Helper-replica/Database Layer",
-  "content_file_path": "./Local-LLM-Helper-replica/Database-Layer/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/Database-Layer/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/Database-Layer",
+  "content_file_path": "./Docmost-mcp-crud/Database-Layer/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/Database-Layer/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }

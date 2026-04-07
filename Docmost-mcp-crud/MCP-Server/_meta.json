@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c557-7ae1-a6e3-3969af421e0f",
+  "id": "019d682d-2d5d-791f-991c-1ddcfae619f5",
   "title": "MCP-Server",
-  "slug_id": null,
+  "slug_id": "0LqigPzzGI",
   "parent_page_id": null,
   "local_dir_name": "MCP-Server",
-  "local_dir_path": "./Local-LLM-Helper-replica/MCP Server",
-  "content_file_path": "./Local-LLM-Helper-replica/MCP-Server/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/MCP-Server/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/MCP-Server",
+  "content_file_path": "./Docmost-mcp-crud/MCP-Server/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/MCP-Server/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }

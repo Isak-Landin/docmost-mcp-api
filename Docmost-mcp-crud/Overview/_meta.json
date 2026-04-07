@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c3a7-7baa-a17a-cd7628b897c8",
+  "id": "019d682d-2afd-7cfe-887c-01d136369a3e",
   "title": "Overview",
-  "slug_id": null,
+  "slug_id": "m8mu5kj7f8",
   "parent_page_id": null,
   "local_dir_name": "Overview",
-  "local_dir_path": "./Local-LLM-Helper-replica/Overview",
-  "content_file_path": "./Local-LLM-Helper-replica/Overview/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/Overview/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/Overview",
+  "content_file_path": "./Docmost-mcp-crud/Overview/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/Overview/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }

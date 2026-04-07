@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c5bf-72bc-9198-462f5eeabdcc",
+  "id": "019d682d-9cfc-71df-a42e-588e2132d165",
   "title": "Replica-System",
-  "slug_id": null,
+  "slug_id": "zib25fwB06",
   "parent_page_id": null,
   "local_dir_name": "Replica-System",
-  "local_dir_path": "./Local-LLM-Helper-replica/Replica System",
-  "content_file_path": "./Local-LLM-Helper-replica/Replica-System/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/Replica-System/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/Replica-System",
+  "content_file_path": "./Docmost-mcp-crud/Replica-System/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/Replica-System/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }

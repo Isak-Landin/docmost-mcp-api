@@ -1,12 +1,12 @@
 {
-  "id": "019d678a-c200-7aee-b4c2-d831f338caa2",
+  "id": "019d682d-2bfa-79c7-9486-5e1ca8b1bf02",
   "title": "Deployment",
-  "slug_id": "oqoWVYozPT",
+  "slug_id": "ezFvO6i1lj",
   "parent_page_id": null,
   "local_dir_name": "Deployment",
   "local_dir_path": "./Docmost-mcp-crud/Deployment",
   "content_file_path": "./Docmost-mcp-crud/Deployment/page.md",
   "meta_file_path": "./Docmost-mcp-crud/Deployment/_meta.json",
   "source": "remote-synced",
-  "space_id": "019d66c9-ef8b-7462-8338-e80a4e1dcfb3"
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }

@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c40c-7585-b839-c6d94cfffcf4",
+  "id": "019d682d-2e5b-722d-953f-9c0cd74408a2",
   "title": "Architecture",
-  "slug_id": null,
+  "slug_id": "BfSNsBQKhK",
   "parent_page_id": null,
   "local_dir_name": "Architecture",
-  "local_dir_path": "./Local-LLM-Helper-replica/Architecture",
-  "content_file_path": "./Local-LLM-Helper-replica/Architecture/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/Architecture/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/Architecture",
+  "content_file_path": "./Docmost-mcp-crud/Architecture/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/Architecture/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d682b-1af2-7333-aab6-2ebcbeb55cff"
 }
