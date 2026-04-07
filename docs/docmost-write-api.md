@@ -49,14 +49,14 @@ Content-Type: application/json
 ```
 
 The response sets a **Set-Cookie: `authToken=<jwt>`** header.
-The JSON body only contains `{"success": true, "status": 200}` — there is no token in the body.
+The JSON body only contains `{"success": true, "status": 200}` - there is no token in the body.
 
 Extract the `authToken` cookie value. This JWT can then be used in two equivalent ways:
 - `Cookie: authToken=<jwt>` header, or
 - `Authorization: Bearer <jwt>` header (verified working; preferred for non-browser clients).
 
 Token type required: standard **ACCESS** JWT (not the internal COLLAB JWT used by the
-WebSocket gateway — that is only used internally by the collab layer and is not needed here).
+WebSocket gateway - that is only used internally by the collab layer and is not needed here).
 
 ---
 
@@ -90,9 +90,9 @@ No follow-up `update` call is needed for a complete page.
 
 ### Content format notes
 
-- `markdown` — converted markdown → HTML → ProseMirror JSON internally
-- `html` — converted HTML → ProseMirror JSON internally
-- `json` — ProseMirror JSON passed through directly (validated before write)
+- `markdown` - converted markdown -> HTML -> ProseMirror JSON internally
+- `html` - converted HTML -> ProseMirror JSON internally
+- `json` - ProseMirror JSON passed through directly (validated before write)
 
 ### Example: create a complete page from markdown
 
@@ -114,13 +114,13 @@ Content-Type: application/json
 
 1. Validates `parentPageId` is in the same space (throws 404 if not)
 2. Calls `parseProsemirrorContent(content, format)`:
-   - markdown path: `markdownToHtml()` → `htmlToJson()`
+   - markdown path: `markdownToHtml()` -> `htmlToJson()`
    - html path: `htmlToJson()`
    - json path: validates with `jsonToNode()`, throws 400 on invalid
 3. Derives `textContent` (plain text) from ProseMirror JSON
-4. Builds binary `ydoc` via `createYdocFromJson()` — this is what the collab layer
+4. Builds binary `ydoc` via `createYdocFromJson()` - this is what the collab layer
    would read if a browser later opens the page
-5. Calls `pageRepo.insertPage()` — single direct DB write, no collab gateway involved
+5. Calls `pageRepo.insertPage()` - single direct DB write, no collab gateway involved
 6. Queues `ADD_PAGE_WATCHERS` job (adds the creating user as a page watcher)
 
 ### Response
@@ -150,7 +150,7 @@ The created page object. Relevant fields:
 Updates title, icon, and/or content of an existing page.
 When content is provided, this routes through the Hocuspocus collab gateway internally
 (via `collaborationGateway.handleYjsEvent('updatePageContent', ...)`) to update the
-live Y.js document alongside the DB — ensuring consistency if the page is open in a
+live Y.js document alongside the DB - ensuring consistency if the page is open in a
 browser at the same time.
 
 ### Request body
@@ -181,13 +181,13 @@ Content-Type: application/json
 
 ### What the server does internally (content path)
 
-1. Calls `parseProsemirrorContent(content, format)` — same conversion as `create`
+1. Calls `parseProsemirrorContent(content, format)` - same conversion as `create`
 2. Calls `collaborationGateway.handleYjsEvent('updatePageContent', 'page.<pageId>', { operation, prosemirrorJson, user })`
 3. Inside the collab handler, `operation` determines how the new JSON is merged into the Y.js doc:
-   - `replace` — replaces the entire document content
-   - `append` — appends nodes after existing content
-   - `prepend` — inserts nodes before existing content
-4. `PersistenceExtension.onStoreDocument()` is triggered (debounced 10–45 s) and writes:
+   - `replace` - replaces the entire document content
+   - `append` - appends nodes after existing content
+   - `prepend` - inserts nodes before existing content
+4. `PersistenceExtension.onStoreDocument()` is triggered (debounced 10-45 s) and writes:
    - `pages.content` (ProseMirror JSON)
    - `pages.ydoc` (binary Y.js state)
    - `pages.textContent` (plain text)
@@ -212,7 +212,7 @@ right after writing, add a short wait or read from the REST response instead.
 | Replace/append/prepend content on an existing page | `POST /api/pages/update` with `operation` + `content` + `format` |
 | Rename a page or change its icon only | `POST /api/pages/update` with `title` / `icon`, no content |
 
-For our use case (syncing local replica → remote Docmost), the expected flow is:
+For our use case (syncing local replica -> remote Docmost), the expected flow is:
 
 1. `POST /api/pages/create` to create the page with full markdown content
 2. Retain the returned `id` for future `update` calls if content changes
