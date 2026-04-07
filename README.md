@@ -21,9 +21,54 @@ Before setup, make sure you have:
 
 ## Full setup from start to finish
 
-### 1. Copy the project to the target server
+Two setup methods are available. Both result in the same running service.
 
-Put the repository on the same server that hosts the live Docmost deployment.
+### Option A: from the published Docker image (recommended)
+
+Pull the image directly from GitHub Container Registry — no clone or build step needed:
+
+```bash
+mkdir -p /opt/docmost-mcp && cd /opt/docmost-mcp
+```
+
+Create a `docker-compose.yml`:
+
+```yaml
+services:
+  docmost-mcp:
+    container_name: docmost-mcp
+    image: ghcr.io/isak-landin/docmost-mcp-api:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DOCMOST_DB_HOST: ${DOCMOST_DB_HOST}
+      DOCMOST_DB_PORT: ${DOCMOST_DB_PORT}
+      DOCMOST_DB_NAME: ${DOCMOST_DB_NAME}
+      DOCMOST_DB_USER: ${DOCMOST_DB_USER}
+      DOCMOST_DB_PASSWORD: ${DOCMOST_DB_PASSWORD}
+      LISTEN_HOST: ${LISTEN_HOST:-0.0.0.0}
+      LISTEN_PORT: ${LISTEN_PORT:-8099}
+      DOCMOST_APP_URL: ${DOCMOST_APP_URL}
+      DOCMOST_USER_EMAIL: ${DOCMOST_USER_EMAIL}
+      DOCMOST_USER_PASSWORD: ${DOCMOST_USER_PASSWORD}
+    ports:
+      - "${EXTERNAL_PORT:-8099}:${LISTEN_PORT:-8099}"
+    networks:
+      - docmost_network
+
+networks:
+  docmost_network:
+    external: true
+    name: ${DOCMOST_NETWORK_NAME:-docmost_default}
+```
+
+Then continue from [step 2](#2-confirm-the-shared-docker-network-name) below. Skip the build step — replace `docker compose up --build -d` with `docker compose up -d`.
+
+---
+
+### Option B: from source
+
+Clone or copy the repository onto the same server that hosts the live Docmost deployment.
 
 Example placeholder path:
 
@@ -128,7 +173,13 @@ LOG_LEVEL=INFO
 
 ### 5. Build and start the container
 
-From the project directory:
+**Option A (image):**
+
+```bash
+docker compose up -d
+```
+
+**Option B (source):**
 
 ```bash
 docker compose up --build -d
@@ -136,7 +187,7 @@ docker compose up --build -d
 
 This will:
 
-1. build the image from `Dockerfile`
+1. pull the published image (Option A) or build from `Dockerfile` (Option B)
 2. create or recreate the `docmost-mcp` container
 3. attach it to the external Docker network set by `DOCMOST_NETWORK_NAME`
 4. expose the service on the configured external port
@@ -737,6 +788,13 @@ Use update_page to update an existing page's title and/or content.
 Use delete_page to soft-delete a page (it moves to Docmost trash).
 Use delete_space to permanently delete a space and all its contents.
 All content is markdown in and out. Never pass ProseMirror JSON to write tools.
+
+All IDs passed to write tools (space_id, page_id, parent_page_id) must originate from a
+prior MCP tool response in the current session — never from memory, local files, or inference.
+  - space_id: must come from list_spaces or create_space.
+  - parent_page_id: must come from list_pages, get_space_tree, or a create_page response.
+A 404 from any write tool means the given ID does not exist in the live Docmost instance.
+Resolve by calling the appropriate read tool (list_spaces, list_pages) to obtain a valid ID.
 
 ## Replica management
 Maintain or create a local replica at `./{space_name}-replica/` when the client workflow allows it.

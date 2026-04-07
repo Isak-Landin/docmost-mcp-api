@@ -1,12 +1,12 @@
 {
-  "id": "019d636e-c73b-79c7-a006-a92972d65252",
+  "id": "019d678a-c200-7aee-b4c2-d831f338caa2",
   "title": "Deployment",
-  "slug_id": null,
+  "slug_id": "oqoWVYozPT",
   "parent_page_id": null,
   "local_dir_name": "Deployment",
-  "local_dir_path": "./Local-LLM-Helper-replica/Deployment",
-  "content_file_path": "./Local-LLM-Helper-replica/Deployment/page.md",
-  "meta_file_path": "./Local-LLM-Helper-replica/Deployment/_meta.json",
-  "source": "remote",
-  "space_id": "019d636e-c35a-7933-8f7a-b2b16faac127"
+  "local_dir_path": "./Docmost-mcp-crud/Deployment",
+  "content_file_path": "./Docmost-mcp-crud/Deployment/page.md",
+  "meta_file_path": "./Docmost-mcp-crud/Deployment/_meta.json",
+  "source": "remote-synced",
+  "space_id": "019d66c9-ef8b-7462-8338-e80a4e1dcfb3"
 }

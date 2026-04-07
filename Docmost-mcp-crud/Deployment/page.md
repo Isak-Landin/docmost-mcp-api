@@ -22,6 +22,21 @@ If your Docmost network has a different name, update the `networks.docmost_netwo
 
 ## Setup steps
 
+Two setup methods are available:
+
+**Option A - from the published Docker image (recommended):**
+
+1. Create a directory on the server running Docmost
+2. Create a `docker-compose.yml` pointing at `ghcr.io/isak-landin/docmost-mcp-api:latest` (see README for full example)
+3. Copy `env.example` to `.env` and fill in values
+4. Ensure the `docmost_default` Docker network exists
+5. Run:
+   ```bash
+   docker compose up -d
+   ```
+
+**Option B - from source:**
+
 1. Clone this repository onto the server running Docmost
 2. Copy `env.example` to `.env` and fill in values (DB credentials, allowed MCP hosts)
 3. Ensure the `docmost_default` Docker network exists
@@ -29,11 +44,12 @@ If your Docmost network has a different name, update the `networks.docmost_netwo
    ```bash
    docker compose up -d --build
    ```
-5. Verify with:
-   ```bash
-   curl http://localhost:8099/health
-   # → {"ok": true}
-   ```
+
+Verify with:
+```bash
+curl http://localhost:8099/health
+# → {"ok": true}
+```
 
 ## Dockerfile
 
