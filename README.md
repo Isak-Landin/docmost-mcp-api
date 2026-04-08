@@ -21,13 +21,14 @@ Before setup, make sure you have:
 
 > **Docmost version requirement - v0.71.1+**
 >
-> Docmost's `ValidationPipe` is configured with `whitelist: true`, which strips any undeclared
-> fields from incoming request bodies. In versions prior to v0.71.1, the `CreatePageDto` and
-> `UpdatePageDto` did not declare `content` or `format`, so those fields were silently discarded
-> and pages were always created empty.
+> Content write operations (creating and updating page content) require Docmost v0.71.1 or later.
+> Earlier versions silently discard the content field, resulting in pages being created empty.
 >
-> From v0.71.1 onward both fields are declared and fully supported. This version was confirmed
-> working in direct testing. To check the version running on your Docmost host:
+> Upgrading Docmost carries no risk to your existing page data. Docmost upgrades are
+> non-destructive - your spaces, pages, and history are stored in PostgreSQL and are not
+> affected by a container image update.
+>
+> To check which version you are currently running:
 >
 > ```bash
 > docker exec docmost cat /app/apps/server/package.json | grep '"version"' | head -1
