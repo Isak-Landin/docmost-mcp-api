@@ -26,7 +26,12 @@ Before setup, make sure you have:
 >
 > Upgrading Docmost carries no risk to your existing page data. Docmost upgrades are
 > non-destructive - your spaces, pages, and history are stored in PostgreSQL and are not
-> affected by a container image update.
+> affected by a container image update. To upgrade, pull the latest image and recreate
+> the container:
+>
+> ```bash
+> docker compose pull docmost && docker compose up -d docmost
+> ```
 >
 > To check which version you are currently running:
 >
