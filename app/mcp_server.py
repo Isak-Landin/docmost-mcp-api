@@ -61,6 +61,11 @@ Use delete_page to soft-delete a page (it moves to Docmost trash).
 Use delete_space to permanently delete a space and all its contents.
 All content is markdown in and out. Never pass ProseMirror JSON to write tools.
 
+Page title rules (applies to create_page and update_page):
+The page title is always passed as a separate 'title' parameter — it is rendered by Docmost
+as the page header above the body. Never include the title as a H1 heading (# Title) at the
+top of the content markdown. Doing so causes the title to appear twice in the rendered page.
+
 Content formatting rules (applies to all page content passed to create_page and update_page):
 Do NOT use Unicode typographic characters in page content. These characters are not reliably
 rendered across all Docmost consumers and may appear as garbled text or question marks.
@@ -305,7 +310,7 @@ def create_page(
 
     Args:
         space_id: UUID of the target space (from list_spaces or create_space).
-        title: Page title (optional).
+        title: Page title (optional). Do NOT repeat this as a H1 heading in content — Docmost renders the title separately above the page body.
         content: Markdown content for the page body (optional).
         parent_page_id: UUID of the parent page (from list_pages, get_space_tree, or an uninterrupted prior create_page); leave empty for root.
     """
@@ -344,7 +349,7 @@ def update_page(
 
     Args:
         page_id: UUID of the page to update.
-        title: New title (leave empty to leave unchanged).
+        title: New title (leave empty to leave unchanged). Do NOT repeat this as a H1 heading in content — Docmost renders the title separately above the page body.
         content: Markdown content (leave empty to leave unchanged).
         operation: How content is applied: 'replace' (default), 'append', or 'prepend'.
     """

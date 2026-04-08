@@ -899,6 +899,15 @@ Columns exposed: `id`, `slug_id`, `title`, `icon`, `position`, `parent_page_id`,
 
 Deleted Docmost rows are excluded by checking `deleted_at IS NULL`.
 
+## Known issues
+
+**Page title duplication (fixed)** — `create_page` and `update_page` both pass `title` as
+a dedicated field; Docmost renders it as the page header above the body. `SERVER_INSTRUCTIONS`
+and tool descriptions now explicitly prohibit including the title as a `# Heading` in the
+content body, which previously caused it to render twice. Pages created before this
+instruction fix still carry a duplicate `# Heading` in their stored content — `update_page`
+will not strip it automatically; content must be explicitly rewritten to remove it.
+
 ## License
 
 See `LICENSE`.
