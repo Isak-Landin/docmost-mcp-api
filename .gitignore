@@ -1,3 +1,4 @@
+setup-repo-git-key.sh
 venv/
 
 # Project specific ignores
